@@ -1,0 +1,10 @@
+{
+    "name": "chatapp-translation-node-sidecar",
+    "version": "1.0.0",
+    "private": true,
+    "type": "commonjs",
+    "dependencies": {
+        "google-translate-api-x": "^10.7.3"
+
+    }
+}

@@ -1,0 +1,1191 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   LINQUA — Translation Chat  |  style.css
+   ───────────────────────────────────────────────────────────────────────
+   Architecture
+   ─────────────
+   1.  Design Tokens  (CSS Custom Properties, dual-mode)
+   2.  Reset & Base
+   3.  Utilities
+   4.  Top Navigation
+   5.  Theme Toggle
+   6.  Hero Section
+   7.  Portal Section  (join / new-room forms)
+   8.  Portal Tabs
+   9.  Form Controls
+   10. Chat Workspace  (#chat-screen)
+       10a. Header
+       10b. Message List & Bubbles
+       10c. Composer / Input
+   11. Scrollbar
+   12. Responsive
+   13. Reduced Motion
+═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ─────────────────────────────────────────────
+   1. DESIGN TOKENS
+   ───────────────────────────────────────────── */
+
+
+/* Light mode (default) */
+
+:root,
+[data-theme="light"] {
+    /* ── Backgrounds ── */
+    --bg-page: #faf8f5;
+    /* warm white base */
+    --bg-surface: #ffffff;
+    /* cards, header, composer */
+    --bg-surface-2: #f2efe9;
+    /* tab bar bg, input bg */
+    --bg-hero: #faf8f5;
+    /* hero full-bleed */
+    /* ── Typography ── */
+    --text-primary: #2d2a26;
+    /* charcoal, main content */
+    --text-secondary: #7a7570;
+    /* labels, meta */
+    --text-muted: #b0aba4;
+    /* placeholders, timestamps */
+    --text-on-accent: #ffffff;
+    /* ── Borders & Dividers ── */
+    --border: #e8e3db;
+    --border-focus: #f22f10;
+    /* ── Accent ── */
+    --accent: #f22f10;
+    /* deep indigo — "translation engine" */
+    --accent-hover: #f22f10;
+    --accent-subtle: #ede9fd;
+    /* tinted accent bg for sent bubbles */
+    /* ── Message Bubbles ── */
+    --bubble-sent-bg: var(--accent-subtle);
+    --bubble-sent-text: #2d2a26;
+    --bubble-recv-bg: #ffffff;
+    --bubble-recv-border: var(--border);
+    /* ── Status ── */
+    --status-green: #22c55e;
+    /* ── Shadows ── */
+    --shadow-sm: 0 1px 3px rgba(45, 42, 38, 0.07), 0 1px 2px rgba(45, 42, 38, 0.04);
+    --shadow-md: 0 4px 16px rgba(45, 42, 38, 0.10), 0 1px 4px rgba(45, 42, 38, 0.06);
+    /* ── Misc ── */
+    --nav-h: 56px;
+    /* sticky nav height */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --radius-pill: 999px;
+    /* ── Typography Scale ── */
+    --font-display: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+
+/* Dark mode */
+
+[data-theme="dark"] {
+    --bg-page: #111110;
+    --bg-surface: #1c1b19;
+    --bg-surface-2: #262522;
+    --bg-hero: #111110;
+    --text-primary: #e8e5df;
+    --text-secondary: #948e85;
+    --text-muted: #5c5750;
+    --text-on-accent: #ffffff;
+    --border: #2e2c28;
+    --border-focus: #f22f10;
+    --accent: #f22f10;
+    --accent-hover: #f22f10;
+    --accent-subtle: #221f40;
+    --bubble-sent-bg: var(--accent-subtle);
+    --bubble-sent-text: #e8e5df;
+    --bubble-recv-bg: #1c1b19;
+    --bubble-recv-border: #2e2c28;
+    --status-green: #4ade80;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.30);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.40);
+}
+
+
+/* ─────────────────────────────────────────────
+   2. RESET & BASE
+   ───────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.55;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100svh;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+select {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+
+/* ─────────────────────────────────────────────
+   3. UTILITIES
+   ───────────────────────────────────────────── */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* Theme-aware surface transition */
+
+.bg-surface {
+    background: var(--bg-surface);
+    transition: background 0.25s ease;
+}
+
+
+/* ─────────────────────────────────────────────
+   4. TOP NAVIGATION
+   ───────────────────────────────────────────── */
+
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    /* Subtle frosted-glass effect */
+    background: color-mix(in srgb, var(--bg-page) 85%, transparent);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+
+/* Brand wordmark */
+
+.nav-brand {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    transition: color 0.15s;
+}
+
+.nav-brand:hover {
+    color: var(--accent);
+}
+
+
+/* ─────────────────────────────────────────────
+   5. THEME TOGGLE
+   ───────────────────────────────────────────── */
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+
+/* Show moon in light mode, sun in dark mode.
+   html[data-theme] gives stronger specificity than bare [data-theme]
+   so neither rule gets overridden by the base .icon-* fallback below. */
+
+html[data-theme="light"] .icon-sun {
+    display: none;
+}
+
+html[data-theme="light"] .icon-moon {
+    display: block;
+}
+
+html[data-theme="dark"] .icon-sun {
+    display: block;
+}
+
+html[data-theme="dark"] .icon-moon {
+    display: none;
+}
+
+
+/* Pre-JS fallback — light assumed until JS sets data-theme */
+
+.icon-sun {
+    display: none;
+}
+
+.icon-moon {
+    display: block;
+}
+
+
+/* ─────────────────────────────────────────────
+   6. HERO SECTION
+   ───────────────────────────────────────────── */
+
+
+/* The landing view is a scrollable single-page column */
+
+.join-screen {
+    background: var(--bg-page);
+    transition: background 0.25s ease;
+}
+
+.hero-section {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--nav-h) + 32px) 24px 48px;
+    background: var(--bg-hero);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.25s ease;
+}
+
+
+/* Subtle ambient radial glow behind the hero word */
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 640px;
+    height: 480px;
+    background: radial-gradient( ellipse at center, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* Eyebrow label */
+
+.hero-label {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    opacity: 0.85;
+}
+
+
+/* The morphing display word */
+
+.hero-word {
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 14vw, 10rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--text-primary);
+    margin-bottom: 28px;
+    /* Monospaced sub-span prevents width jumps during scramble */
+    font-variant-numeric: tabular-nums;
+    min-height: 1.05em;
+    transition: color 0.25s ease;
+}
+
+
+/* Inner span — JS writes textContent here */
+
+.hero-word-inner {
+    display: inline-block;
+    /* During glitch, characters look slightly techy */
+    font-feature-settings: 'kern' 1;
+}
+
+
+/* Tagline */
+
+.hero-sub {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    max-width: 340px;
+    margin-bottom: 56px;
+    transition: color 0.25s ease;
+}
+
+
+/* Animated scroll cue chevron */
+
+.scroll-cue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    animation: bounce-down 2.2s ease-in-out infinite;
+    transition: color 0.15s, border-color 0.15s, background 0.25s;
+}
+
+.scroll-cue:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    animation-play-state: paused;
+}
+
+@keyframes bounce-down {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(7px);
+    }
+}
+
+
+/* ─────────────────────────────────────────────
+   7. PORTAL SECTION  (join / room forms)
+   ───────────────────────────────────────────── */
+
+.portal-section {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    background: var(--bg-page);
+    transition: background 0.25s ease;
+}
+
+.portal-container {
+    width: 100%;
+    max-width: 420px;
+    /* No card — blends directly into the page background */
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 8px;
+    box-shadow: none;
+}
+
+
+/* ─────────────────────────────────────────────
+   8. PORTAL TABS
+   ───────────────────────────────────────────── */
+
+.portal-tabs {
+    display: flex;
+    position: relative;
+    background: var(--bg-surface-2);
+    border-radius: var(--radius-md);
+    padding: 3px;
+    margin-bottom: 32px;
+    transition: background 0.25s ease;
+}
+
+.portal-tab {
+    flex: 1;
+    padding: 8px 12px;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: calc(var(--radius-md) - 3px);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+}
+
+.portal-tab.active {
+    color: var(--text-primary);
+}
+
+.portal-tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+
+/* Sliding pill indicator */
+
+.tab-indicator {
+    position: absolute;
+    top: 3px;
+    height: calc(100% - 6px);
+    background: var(--bg-surface);
+    border-radius: calc(var(--radius-md) - 3px);
+    box-shadow: var(--shadow-sm);
+    transition: left 0.25s cubic-bezier(0.34, 1.36, 0.64, 1), width 0.25s cubic-bezier(0.34, 1.36, 0.64, 1);
+    pointer-events: none;
+    z-index: 0;
+}
+
+
+/* Panel visibility */
+
+.portal-panel {
+    display: none;
+    animation: fade-in-up 0.22s ease;
+}
+
+.portal-panel.active {
+    display: block;
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ─────────────────────────────────────────────
+   9. FORM CONTROLS
+   ───────────────────────────────────────────── */
+
+.portal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* gap managed by .field-group margin */
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 18px;
+}
+
+.field-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
+    transition: color 0.25s ease;
+}
+
+.field-input {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg-surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.18s ease, background 0.25s ease, color 0.25s ease;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.field-input::placeholder {
+    color: var(--text-muted);
+}
+
+.field-input:focus {
+    border-color: var(--accent);
+    background: var(--bg-surface);
+}
+
+
+/* Monospaced variant for room code input */
+
+.field-input--mono {
+    font-family: 'SF Mono', 'Fira Code', 'Roboto Mono', ui-monospace, monospace;
+    letter-spacing: 0.06em;
+    font-size: 0.875rem;
+}
+
+
+/* Select wrapper — positions custom chevron */
+
+.select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.select-wrapper .field-select {
+    cursor: pointer;
+    padding-right: 36px;
+    /* space for chevron */
+}
+
+.select-chevron {
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+
+/* Primary action button */
+
+.btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 13px 20px;
+    background: var(--accent);
+    color: var(--text-on-accent);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    transition: background 0.18s ease, transform 0.12s ease;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary svg {
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+}
+
+.btn-primary:hover svg {
+    transform: translateX(3px);
+}
+
+.btn-primary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* ─────────────────────────────────────────────
+   10. CHAT WORKSPACE  (#chat-screen)
+   ───────────────────────────────────────────── */
+
+.chat-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--bg-page);
+    transition: background 0.25s ease;
+}
+
+
+/* ── 10a. Chat Header ── */
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.chat-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+
+/* User avatar bubble */
+
+.avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    color: var(--text-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.chat-header-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+
+/* #header-name target */
+
+.chat-header-name {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.25s ease;
+}
+
+.chat-header-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--status-green);
+    flex-shrink: 0;
+    /* Gentle pulse */
+    animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(0.85);
+    }
+}
+
+.status-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: color 0.25s ease;
+}
+
+
+/* Smaller theme toggle inside chat header */
+
+.theme-toggle--inline {
+    width: 32px;
+    height: 32px;
+}
+
+
+/* ── 10b. Message List & Bubbles ── */
+
+
+/* #message-area scroll container */
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px;
+    background: var(--bg-page);
+    transition: background 0.25s ease;
+}
+
+
+/* #message-list */
+
+.message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* Individual message wrapper */
+
+.message-item {
+    display: flex;
+    flex-direction: column;
+    max-width: 78%;
+    animation: msg-appear 0.2s ease;
+}
+
+@keyframes msg-appear {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* Sent = right-aligned */
+
+.message-item.sent {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+
+/* Received = left-aligned */
+
+.message-item.received {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+
+/* Sender name (shown above received bubbles only) */
+
+.sender-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    padding: 0 4px;
+    letter-spacing: 0.01em;
+    transition: color 0.25s ease;
+}
+
+
+/* Bubble */
+
+.message-bubble {
+    padding: 11px 15px;
+    border-radius: var(--radius-lg);
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+
+/* ── Sent bubble ── */
+
+.message-item.sent .message-bubble {
+    background: var(--bubble-sent-bg);
+    color: var(--bubble-sent-text);
+    border: none;
+    /* Flatten top-right corner for a "tail" illusion */
+    border-radius: var(--radius-lg) 6px var(--radius-lg) var(--radius-lg);
+}
+
+
+/* ── Received bubble ── */
+
+.message-item.received .message-bubble {
+    background: var(--bubble-recv-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--bubble-recv-border);
+    /* Flatten top-left corner */
+    border-radius: 6px var(--radius-lg) var(--radius-lg) var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+
+/* Original text (shown in smaller muted style above translation) */
+
+.original-text {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    transition: color 0.25s ease;
+}
+
+
+/* Translated / primary text */
+
+.translated-text {
+    font-size: 0.9375rem;
+    color: inherit;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+
+/* System messages: join / leave notifications */
+
+.message-item.system {
+    align-self: center;
+    max-width: 90%;
+    animation: msg-appear 0.2s ease;
+}
+
+.message-item.system .message-bubble {
+    background: transparent;
+    border: none;
+    padding: 2px 10px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+
+/* ── 10c. Composer / Input ── */
+
+.chat-composer {
+    padding: 12px 16px 20px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+
+/* #message-form */
+
+.composer-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 5px 5px 5px 18px;
+    transition: border-color 0.18s ease, background 0.25s ease;
+}
+
+.composer-form:focus-within {
+    border-color: var(--accent);
+}
+
+
+/* #message-input */
+
+.composer-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    outline: none;
+    padding: 8px 0;
+    min-width: 0;
+    transition: color 0.25s ease;
+}
+
+.composer-input::placeholder {
+    color: var(--text-muted);
+}
+
+
+/* Send button */
+
+.composer-send {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-pill);
+    border: none;
+    background: var(--accent);
+    color: var(--text-on-accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.18s ease, transform 0.12s ease;
+}
+
+.composer-send:hover {
+    background: var(--accent-hover);
+    transform: scale(1.06);
+}
+
+.composer-send:active {
+    transform: scale(0.96);
+}
+
+.composer-send:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.composer-send:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+
+/* ─────────────────────────────────────────────
+   11. SCROLLBAR
+   ───────────────────────────────────────────── */
+
+.chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-pill);
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+
+/* ─────────────────────────────────────────────
+   12. RESPONSIVE
+   ───────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+    /* Tighten nav */
+    .top-nav {
+        padding: 0 18px;
+    }
+    /* Reduce hero word scale slightly */
+    .hero-word {
+        font-size: clamp(3.5rem, 18vw, 6rem);
+    }
+    /* Chat */
+    .chat-header {
+        padding: 12px 16px;
+    }
+    .chat-messages {
+        padding: 16px 14px;
+    }
+    .message-item {
+        max-width: 90%;
+    }
+    .chat-composer {
+        padding: 10px 14px 16px;
+    }
+}
+
+@media (max-width: 360px) {
+    .portal-section {
+        padding: 60px 20px;
+    }
+}
+
+
+/* ─────────────────────────────────────────────
+   13. ROOM CODE BADGE
+   Pill chip in the chat header showing the private
+   room code; click copies it to the clipboard.
+   ───────────────────────────────────────────── */
+
+.room-code-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px 5px 8px;
+    background: var(--bg-surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-family: 'SF Mono', 'Fira Code', 'Roboto Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.room-code-badge:hover {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.room-code-badge:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* The code text span */
+.room-badge-code {
+    letter-spacing: 0.1em;
+}
+
+/* "Copied ✓" label — hidden by default, shown on copy */
+.room-badge-copied {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.72rem;
+    border-radius: var(--radius-pill);
+    opacity: 0;
+    transform: scale(0.88);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+    letter-spacing: 0.04em;
+}
+
+/* Trigger the copied state */
+.room-code-badge.copied .room-badge-copied {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.room-code-badge.copied .room-badge-code,
+.room-code-badge.copied .room-code-icon {
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+/* Copy icon within badge */
+.room-code-icon {
+    flex-shrink: 0;
+    transition: opacity 0.12s ease;
+}
+
+
+/* ─────────────────────────────────────────────
+   14. ROOM CODE ERROR  (join-room inline error)
+   ───────────────────────────────────────────── */
+
+.room-code-error {
+    margin-top: 10px;
+    padding: 9px 13px;
+    background: color-mix(in srgb, #f22f10 10%, transparent);
+    border: 1px solid color-mix(in srgb, #f22f10 30%, transparent);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    color: #f22f10;
+    text-align: center;
+    animation: fade-in-up 0.2s ease;
+}
+
+
+/* ─────────────────────────────────────────────
+   15. REDUCED MOTION
+   Respect users who prefer less animation.
+   ───────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .scroll-cue {
+        animation: none;
+    }
+    .status-dot {
+        animation: none;
+    }
+    .message-item {
+        animation: none;
+    }
+    .portal-panel.active {
+        animation: none;
+    }
+    .btn-primary,
+    .btn-primary:hover,
+    .btn-primary svg,
+    .btn-primary:hover svg,
+    .composer-send:hover,
+    .composer-send:active {
+        transform: none;
+        transition: none;
+    }
+    .hero-word {
+        transition: none;
+    }
+    .room-code-badge .room-badge-copied {
+        transition: none;
+    }
+}
