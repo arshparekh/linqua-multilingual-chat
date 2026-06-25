@@ -46,11 +46,12 @@ public class NodeTranslationClient {
             cmd.add(nodeExecutable);
             cmd.add(scriptPath);
 
-            // Ensure node runs from project root so relative scriptPath like `node/translate.js` resolves.
-            // (If this fails in your environment, we can make it configurable.)
+            // Make sure node script path like `node/translate.js` resolves in Docker.
+            // Container WORKDIR is /app, and we copy `node/` into /app/node.
             ProcessBuilder pb = new ProcessBuilder(cmd);
-            pb.directory(new java.io.File("."));
-            pb.redirectErrorStream(false);
+            pb.directory(new java.io.File("/app"));
+            pb.redirectErrorStream(true);
+
 
             Process p = pb.start();
 
